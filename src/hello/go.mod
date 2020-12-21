@@ -1,3 +1,3 @@
-module github.com/loicbaron/go/src/hello
+module hello
 
 go 1.15
