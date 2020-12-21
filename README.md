@@ -1,8 +1,8 @@
 # go
 
-Learning GO
+Learning GoLang.
 
-# Tour of GO
+# Tour of Go
 
 Some examples from <a href="https://tour.golang.org/" target="_blank">https://tour.golang.org/</a>
 
