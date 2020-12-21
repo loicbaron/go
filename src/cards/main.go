@@ -7,5 +7,6 @@ func main() {
 	cards = append(cards, "Six of Spades")
 	// hand, remaining := deal(cards, 5)
 
+	cards.saveToFile("out.txt")
 	fmt.Println(cards.toString())
 }
