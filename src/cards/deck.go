@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strings"
@@ -38,12 +37,12 @@ func (d deck) toString() string {
 	return strings.Join([]string(d), ",")
 }
 
-func (d deck) saveToFile(filename string) error {
-	return ioutil.WriteFile(filename, []byte(d.toString()), 0666)
+func (d deck) saveToFile(w Writer, filename string) error {
+	return w.WriteFile(filename, []byte(d.toString()), 0666)
 }
 
-func loadDeckFromFile(filename string) deck {
-	bs, err := ioutil.ReadFile(filename)
+func loadDeckFromFile(r Reader, filename string) deck {
+	bs, err := r.ReadFile(filename)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		// Option #1 - return newDeck()

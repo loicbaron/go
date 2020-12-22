@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"os"
+	"testing"
+)
 
 func TestNewDeck(t *testing.T) {
 	d := newDeck()
@@ -15,4 +19,30 @@ func TestNewDeck(t *testing.T) {
 	if last != "Four of Clubs" {
 		t.Errorf("Expected first card Four of Clubs, but got %v", last)
 	}
+}
+
+// source: https://willdot.net/29MockingAWriterInGo/
+type FakeFileWriter struct {
+}
+
+func (f FakeFileWriter) WriteFile(filename string, data []byte, perm os.FileMode) error {
+	return nil
+}
+
+func TestSaveToFile(t *testing.T) {
+	d := newDeck()
+	r := d.saveToFile(FakeFileWriter{}, "test")
+	fmt.Println(r)
+}
+
+type FakeFileReader struct {
+}
+
+func (f FakeFileReader) ReadFile(filename string) ([]byte, error) {
+	d := newDeck()
+	return []byte(d.toString()), nil
+}
+func TestLoadDeckFromFile(t *testing.T) {
+	d := loadDeckFromFile(FakeFileReader{}, "test")
+	fmt.Println(d)
 }
