@@ -3,14 +3,14 @@ package main
 import "fmt"
 
 func firstNonRepeating(s string) string {
-		charCount := make(map[string]int)
+		charCount := make(map[rune]int)
 		for _, char := range s {
 			fmt.Println(string(char))
-			charCount[string(char)]++
+			charCount[char]++
 		}
 		fmt.Println(charCount)
 		for _, char := range s {
-			if charCount[string(char)] == 1 {
+			if charCount[char] == 1 {
 				return string(char)
 			}
 		}
