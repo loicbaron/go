@@ -8,15 +8,11 @@ func lengthOfLongestSubstring(s string) int {
 		start := 0
 		for i, char := range s {
 			fmt.Println(i, char, string(char), charIndex)
-			index, found := charIndex[char]
-			fmt.Println("index", index, "found", found)
-			if found && index >= start {
+			if index, found := charIndex[char]; found && index >= start {
 				start = index + 1
 			}
 			charIndex[char] = i
-			length := i - start + 1
-			fmt.Println("length", length)
-			if length > maxLength {
+			if length := i - start + 1; length > maxLength {
 				maxLength = length
 			}
 		}
