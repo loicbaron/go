@@ -22,11 +22,7 @@ func reverseString(s string) string {
 
 func isPalindrome(s string) bool {
 		x := clearString(strings.ToLower(s))
-		y := reverseString(x)
-		if x == y {
-			return true
-		}
-    return false
+		return x == reverseString(x)
 }
 
 func main() {
