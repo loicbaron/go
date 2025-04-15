@@ -50,15 +50,15 @@ func isPrime(num int) bool {
 	return true
 }
 
-func isPrimeChunk(chunk []int, ch chan []int, wg *sync.WaitGroup) {
+func isPrimeChunk(start, end int, ch chan []int, wg *sync.WaitGroup) {
 	defer wg.Done() // Decrement the counter when the goroutine completes
 	// Calculate prime numbers of the chunk
-	fmt.Println("Chunk:", chunk)
+	fmt.Println("Start:", start, "End:", end)
 	output := []int{}
-	for i := range chunk {
-			if(isPrime(chunk[i])) {
-				output = append(output, chunk[i])
-			}
+	for num := start; num < end; num++ {
+		if isPrime(num) {
+			output = append(output, num)
+		}
 	}
 	// Send the output to the channel
 	ch <- output
@@ -84,22 +84,17 @@ func main() {
 	chunkSize := input / numGoroutines
 	fmt.Println("Chunk size:", chunkSize)
 
-	arr := make([]int, input)
-	for i := range arr { arr[i] = i }
-
 	for i := 0; i < numGoroutines; i++ {
 		start := i * chunkSize
 		end := start + chunkSize
-
 		if i == numGoroutines-1 {
-			end = len(arr)
+			end = input
 		}
-		chunk := arr[start:end]
-		// Increment the WaitGroup counter for each goroutine
+
 		wg.Add(1)
-		// Create a goroutine for each chunk
-		go isPrimeChunk(chunk, ch, &wg)
+		go isPrimeChunk(start, end, ch, &wg)
 	}
+
 	// Wait for all goroutines to finish
 	wg.Wait()
 
