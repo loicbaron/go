@@ -50,7 +50,6 @@ func main() {
 		wg.Add(1)
 		// Create a goroutine for each chunk
 		go sumChunk(chunk, ch, &wg)
-
 	}
 	// Wait for all goroutines to finish
 	wg.Wait()

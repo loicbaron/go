@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 /*
@@ -49,14 +50,64 @@ func isPrime(num int) bool {
 	return true
 }
 
-func main() {
-	fmt.Println("hello")
-	input := 30 // range
+func isPrimeChunk(chunk []int, ch chan []int, wg *sync.WaitGroup) {
+	defer wg.Done() // Decrement the counter when the goroutine completes
+	// Calculate prime numbers of the chunk
+	fmt.Println("Chunk:", chunk)
 	output := []int{}
-	for i := range input {
-			if(isPrime(i)) {
-				output = append(output, i)
+	for i := range chunk {
+			if(isPrime(chunk[i])) {
+				output = append(output, chunk[i])
 			}
 	}
-	fmt.Println("Prime numbers up to", input, "are:", output)
+	// Send the output to the channel
+	ch <- output
+}
+
+func main() {
+	input := 30 // range
+	output := []int{}
+	// for i := range input {
+	// 		if(isPrime(i)) {
+	// 			output = append(output, i)
+	// 		}
+	// }
+	// fmt.Println("Sequential: prime numbers up to", input, "are:", output)
+
+	// Parallel calculation using goroutines
+	numGoroutines := 4
+	// Create a channel to collect results
+	ch := make(chan []int, numGoroutines)
+	// Use WaitGroup to wait for all goroutines to finish
+	var wg sync.WaitGroup
+
+	chunkSize := input / numGoroutines
+	fmt.Println("Chunk size:", chunkSize)
+
+	arr := make([]int, input)
+	for i := range arr { arr[i] = i }
+
+	for i := 0; i < numGoroutines; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+
+		if i == numGoroutines-1 {
+			end = len(arr)
+		}
+		chunk := arr[start:end]
+		// Increment the WaitGroup counter for each goroutine
+		wg.Add(1)
+		// Create a goroutine for each chunk
+		go isPrimeChunk(chunk, ch, &wg)
+	}
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Close the channel
+	close(ch)
+
+	for numbers := range ch {
+		output = append(output, numbers...)
+	}
+	fmt.Println("Parallel: prime numbers up to", input, "are:", output)
 }
