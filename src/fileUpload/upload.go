@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,44 +13,39 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse multipart form data (maxMemory specifies the max memory used before writing to disk)
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	// Prepare a new request to the target server
+	targetURL := "http://localhost:8181/store"
+
+	// Create a new POST request with the same body
+	req, err := http.NewRequest(http.MethodPost, targetURL, r.Body)
 	if err != nil {
-		http.Error(w, "Error parsing form data: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Failed to create forward request: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Important: copy the headers (especially Content-Type for multipart/form-data)
+	req.Header = r.Header
 
-	// Retrieve the file from form data
-	file, handler, err := r.FormFile("file")
+	// Use default HTTP client to send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		http.Error(w, "Error retrieving the file: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Error forwarding request: "+err.Error(), http.StatusBadGateway)
 		return
 	}
-	defer file.Close()
+	defer resp.Body.Close()
 
-	// Create a destination file
-	dst, err := os.Create("./uploads/" + handler.Filename)
-	if err != nil {
-		http.Error(w, "Unable to create the file: "+err.Error(), http.StatusInternalServerError)
-		return
+	// Copy response headers and body from target server to client
+	for key, values := range resp.Header {
+		for _, v := range values {
+			w.Header().Add(key, v)
+		}
 	}
-	defer dst.Close()
-
-	// Copy the uploaded file's content to the destination file
-	_, err = io.Copy(dst, file)
-	if err != nil {
-		http.Error(w, "Error saving the file: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintf(w, "File uploaded successfully: %s\n", handler.Filename)
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 }
 
 func main() {
-	// Make sure uploads directory exists
-	os.MkdirAll("./uploads", os.ModePerm)
-
 	http.HandleFunc("/upload", uploadHandler)
-	fmt.Println("Server listening on :8080")
+	fmt.Println("Upload Server listening on :8080")
 	http.ListenAndServe(":8080", nil)
 }
