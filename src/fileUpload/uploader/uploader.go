@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("received request %s %s %s", r.Method, r.URL.Path, r.RemoteAddr)
 	// Only allow POST requests
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -45,6 +47,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.SetPrefix("[uploader] ")
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
 	http.HandleFunc("/upload", uploadHandler)
 	fmt.Println("Upload Server listening on :8080")
 	http.ListenAndServe(":8080", nil)
