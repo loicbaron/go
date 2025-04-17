@@ -18,7 +18,3 @@ func Init() {
 	Warn = log.New(os.Stdout, "[WARN] ", flags)
 	Error = log.New(os.Stderr, "[ERROR] ", flags)
 }
-
-func SetPrefix(prefix string) {
-	log.SetPrefix(prefix)
-}

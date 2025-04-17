@@ -54,7 +54,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	logger.Init()
-	logger.SetPrefix("[uploader] ")
 
 	http.HandleFunc("/upload", uploadHandler)
 	logger.Info.Println("Upload Server listening on :8080")
